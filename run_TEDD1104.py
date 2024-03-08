@@ -13,20 +13,22 @@ from utils import mse
 from keyboard.inputsHandler import select_key
 from keyboard.getkeys import id_to_key
 import math
+from screen.img_process_new import img_process #
+from detection.lane_detect_new import detect_lane, draw_lane # 车道检测
 
 from typing import Optional
 
-try:
-    from controller.xbox_controller_emulator import XboxControllerEmulator
+#try:
+    ##from controller.xbox_controller_emulator import XboxControllerEmulator
 
-    _controller_available = True
-except ImportError:
-    _controller_available = False
-    XboxControllerEmulator = None
-    print(
-        f"[WARNING!] Controller emulation unavailable, see controller/setup.md for more info. "
-        f"You can ignore this warning if you will use the keyboard as controller for TEDD1104."
-    )
+    ##_controller_available = True
+###except ImportError:
+_controller_available = False
+XboxControllerEmulator = None
+print(
+    f"[WARNING!] Controller emulation unavailable, see controller/setup.md for more info. "
+    f"You can ignore this warning if you will use the keyboard as controller for TEDD1104."
+)
 
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
@@ -36,9 +38,9 @@ else:
 
 
 def run_ted1104(
-    checkpoint_path: str,
     enable_evasion: bool,
     show_current_control: bool,
+    checkpoint_path: str = "models\TEDD1107_model.ckpt",
     num_parallel_sequences: int = 2,
     width: int = 1600,
     height: int = 900,
@@ -75,7 +77,6 @@ def run_ted1104(
     :param dtype: Data type to use for the model. BF16 is only supported on Nvidia Ampere GPUs and requires
     PyTorch 1.10 or higher.
     """
-
     assert control_mode in [
         "keyboard",
         "controller",
@@ -86,7 +87,7 @@ def run_ted1104(
             f"Controller emulation not available see controller/setup.md for more info."
         )
 
-    show_what_ai_sees: bool = False
+    show_what_ai_sees: bool = TRUE
     fp16: bool
 
     model = Tedd1104ModelPL.load_from_checkpoint(
@@ -146,6 +147,9 @@ def run_ted1104(
     lx: float = 0
 
     while not close_app:
+        #screen, resized, speed, direct = img_process("Grand Theft Auto V")
+        #lane, stop_line = detect_lane(screen)
+        #screen[280:-130, :, :] = draw_lane(screen[280:-130, :, :], lane, stop_line, [0, 0, 255],  [0, 0, 255])
         try:
             while last_num == img_sequencer.num_sequence:
                 time.sleep(0.01)
